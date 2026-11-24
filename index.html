@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
   <meta name="theme-color" content="#231e32">
+  <meta name="referrer" content="no-referrer">
   <meta name="description" content="Соединяй цветные гексы, заряжай башни и получай фишки слияния.">
   <title>Гексы — мобильный прототип</title>
   <link rel="icon" href="assets/hex-neutral-rounded-64.png">
   <link rel="stylesheet" href="styles.css">
-  <script type="module" src="src/vk-leaderboard.mjs?v=2"></script>
+  <script type="module" src="src/vk-leaderboard.mjs?v=3"></script>
 </head>
 <body>
   <main id="game" aria-label="Hex Towers">
@@ -51,9 +52,9 @@
     </dialog>
     <p id="accessible-instructions" class="sr-only">Перетащите одну из трёх фигур на поле. Клавиатура: 1, 2, 3 — выбрать фигуру; стрелки — двигать; Enter — поставить; Escape — отменить перенос.</p>
   </main>
-  <iframe id="main-menu-screen" title="Главное меню" src="assets/main-menu/index.html" hidden></iframe>
+  <iframe id="main-menu-screen" title="Главное меню" src="assets/main-menu/index.html?v=3" hidden></iframe>
   <script src="vendor/pixi.min.js"></script>
-  <script type="module" src="src/main.mjs?v=2"></script>
+  <script type="module" src="src/main.mjs?v=3"></script>
 </body>
 </html>
 

@@ -2,7 +2,9 @@ const indicator=document.querySelector('.tab-indicator');let indicatorSide=0;let
 const ranking=document.querySelector('#ranking'),yourRow=document.querySelector('.your-row');
 const rankingData={},rankingRequests={};
 const menuScreen=document.querySelector('.screen');
-let requestSequence=0;
+const dayFormat=new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',year:'numeric',month:'numeric',day:'numeric'});
+const playerName=document.querySelector('.guest-name'),playerPlace=document.querySelector('#place');
+let requestSequence=0,playerProfile=null,lastResult=null;
 
 function requestRanking(mode){
   if(window.parent===window)return;
@@ -18,11 +20,42 @@ function rankingElement(tag,className,value){
   return element;
 }
 
+function updateAvatar(element,rank,avatar){
+  const label=rank??'—';
+  element.textContent=label;
+  if(typeof avatar!=='string'||!avatar.startsWith('https://'))return;
+  const photo=document.createElement('img');
+  photo.alt='';
+  photo.referrerPolicy='no-referrer';
+  photo.addEventListener('error',()=>{if(photo.parentNode===element)element.textContent=label;},{once:true});
+  photo.src=avatar;
+  element.replaceChildren(photo);
+  if(element===playerPlace&&rank!=null)element.append(rankingElement('span','avatar-rank',rank));
+}
+
+function updatePlayer(mode){
+  const data=rankingData[mode]??{};
+  const personal=data.personal;
+  playerName.textContent=playerProfile?.name||personal?.name||(data.rows?'Вы':'Гость');
+  if(menuScreen.classList.contains('result-transition')){
+    updateAvatar(playerPlace,null,playerProfile?.avatar);
+    return;
+  }
+  const recent=mode==='day'&&lastResult?.day===dayFormat.format() ? lastResult.score : undefined;
+  const score=recent!==undefined ? Math.max(recent,personal?.score??0) : personal?.score;
+  const rank=score===personal?.score ? personal?.rank : null;
+  updateAvatar(playerPlace,rank,playerProfile?.avatar||personal?.avatar);
+  document.querySelector('#score').textContent=score?.toLocaleString('ru-RU')??'—';
+  document.querySelector('#movement').style.visibility='hidden';
+}
+
 function show(mode){
   const data=rankingData[mode]??{};
-  const rows=(data.rows??[]).map(({name,score,rank})=>{
+  const rows=(data.rows??[]).map(({name,score,rank,avatar})=>{
     const row=rankingElement('div','row','');
-    row.append(rankingElement('span','rank',rank),rankingElement('span','avatar',rank),
+    const image=rankingElement('span','avatar','');
+    updateAvatar(image,rank,avatar);
+    row.append(rankingElement('span','rank',rank),image,
       rankingElement('span','name',name),rankingElement('strong','',score.toLocaleString('ru-RU')));
     return row;
   });
@@ -31,16 +64,17 @@ function show(mode){
   if(data.notice)rows.unshift(rankingElement('p','ranking-status',data.notice));
   if(message)rows.push(rankingElement('p','ranking-status',message));
   ranking.replaceChildren(...rows);
-  if(menuScreen.classList.contains('result-transition'))return;
-  const personal=data.personal;
-  document.querySelector('.guest-name').textContent=personal?.name??(data.rows?'Вы':'Гость');
-  document.querySelector('#place').textContent=personal?.rank??'—';
-  document.querySelector('#score').textContent=personal?.score?.toLocaleString('ru-RU')??'—';
-  document.querySelector('#movement').style.visibility='hidden';
+  updatePlayer(mode);
 }
 let rankingRun=0,rankingAnimations=[],renderedMode='day';
 window.addEventListener('message',event=>{
-  if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='hex-ranking-data')return;
+  if(event.origin!==location.origin||event.source!==window.parent)return;
+  if(event.data?.type==='hex-ranking-profile'){
+    playerProfile=event.data.profile;
+    updatePlayer(renderedMode);
+    return;
+  }
+  if(event.data?.type!=='hex-ranking-data')return;
   const {mode,requestId,data}=event.data;
   if(rankingRequests[mode]!==requestId)return;
   rankingData[mode]=data;
@@ -79,13 +113,15 @@ document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>
 window.addEventListener('message',async event=>{
   if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='hex-result-show')return;
   const score=Math.max(0,Math.floor(Number(event.data.score)||0)),best=Math.max(0,Math.floor(Number(event.data.best)||0)),newRecord=Boolean(event.data.newRecord),screen=document.querySelector('.screen');
+  const day=dayFormat.format();
+  lastResult={day,score:Math.max(score,lastResult?.day===day?lastResult.score:0)};
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,firstResult=best===0;
   const dim=document.createElement('div');dim.className='result-dim';document.body.append(dim);
   const points=document.querySelector('#score'),place=document.querySelector('#place'),movement=document.querySelector('#movement');
   interruptRanking();
   indicatorSide=0;indicatorAnimation?.cancel();indicator.style.transform='translateX(0)';
   document.querySelectorAll('.tab').forEach(tab=>{const selected=tab.dataset.mode==='day';tab.classList.toggle('active',selected);tab.setAttribute('aria-selected',selected);});
-  show('day');renderedMode='day';ranking.scrollTop=0;place.textContent='—';requestRanking('day');
+  show('day');renderedMode='day';ranking.scrollTop=0;updateAvatar(place,null,playerProfile?.avatar);requestRanking('day');
   movement.style.visibility='hidden';points.textContent='0';yourRow.classList.remove('rise');yourRow.classList.add('result-centered','result-transition-row');
   const result=points.parentElement,scores=document.createElement('span'),bestLine=document.createElement('span'),scoreLine=document.createElement('span');
   scores.className='result-scores';bestLine.className=scoreLine.className='result-score-line';

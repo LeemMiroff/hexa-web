@@ -7,7 +7,7 @@ import {VISUAL_THEME,VISUAL_THEMES,getNextTheme,getEngineTheme} from './visual-t
 import {createThemeAssetLoader} from './theme-assets.mjs';
 import {createParticlePainter} from './particle-painter.mjs';
 import {createSoftGlassPalette,createWoodGlassPalette,createWarmCeramicPalette,createSoftOriginalPalette} from './sound-palette.mjs';
-import {readLeaderboard,submitLeaderboardScore} from './vk-leaderboard.mjs?v=2';
+import {readLeaderboard,readLeaderboardProfile,submitLeaderboardScore} from './vk-leaderboard.mjs?v=3';
 let visualTheme=VISUAL_THEME;
 try{localStorage.removeItem('hex-unlocked-themes');}catch{}
 try{const saved=localStorage.getItem('hex-visual-theme'),unlocked=JSON.parse(localStorage.getItem('hex-unlocked-themes')||'[]');if(saved==='warm-flat-test'||(['pearl','monochrome'].includes(saved)&&Array.isArray(unlocked)&&unlocked.includes(saved)))visualTheme=VISUAL_THEMES[saved];}catch{}
@@ -461,9 +461,13 @@ window.addEventListener('message',event=>{
   if(event.data?.type==='hex-result-best'){sound.effects.best();return;}
   if(event.data?.type==='hex-ranking-request'){
     const {mode,requestId}=event.data;
-    if(mode==='day'||mode==='all') readLeaderboard(mode).then(data=>{
-      $('main-menu-screen').contentWindow?.postMessage({type:'hex-ranking-data',mode,requestId,data},location.origin);
-    });
+    if(mode==='day'||mode==='all'){
+      const menu=event.source;
+      readLeaderboardProfile().then(profile=>{
+        if(profile)menu.postMessage({type:'hex-ranking-profile',profile},location.origin);
+      });
+      readLeaderboard(mode).then(data=>menu.postMessage({type:'hex-ranking-data',mode,requestId,data},location.origin));
+    }
     return;
   }
   if(event.data?.type==='hex-result-pop'){playResultPop(Number(event.data.index)||0);return;}

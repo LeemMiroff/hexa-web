@@ -42,6 +42,10 @@ input,textarea,[contenteditable="true"]{user-select:text;-webkit-user-select:tex
 /* Extend the fade into the existing space above the first row. */
 .ranking{margin-top:4px}
 .ranking-status{margin:16px 0;text-align:center;color:inherit;opacity:.72;font:600 14px system-ui}
+.ranking .avatar,.your-row .avatar{position:relative}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.avatar-rank{position:absolute;bottom:2px;padding:0 4px;border-radius:4px;background:#241d30;color:#fff;font:700 11px system-ui}
+.your-name,.guest-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ranking::before{flex-basis:17px}
 @media(max-height:700px){.ranking{margin-top:0}}
 .ranking{scrollbar-width:none;-ms-overflow-style:none;padding-right:0}.ranking::-webkit-scrollbar{display:none;width:0;height:0}
