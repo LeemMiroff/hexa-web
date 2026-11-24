@@ -10,7 +10,7 @@ let tokenPromise;
 let pendingScore;
 
 async function loadBridge() {
-  const {default: bridge} = await import('https://cdn.jsdelivr.net/npm/@vkontakte/vk-bridge@2.15.0/+esm');
+  const {default: bridge} = await import('../vendor/vk-bridge-2.15.0.mjs');
   await bridge.send('VKWebAppInit');
   return bridge;
 }
@@ -21,6 +21,11 @@ function getBridge() {
     throw error;
   });
   return bridgePromise;
+}
+
+// VK keeps its loading screen visible until the game sends VKWebAppInit.
+if (appId === hexaAppId) {
+  getBridge().catch(() => console.warn('VK Bridge initialization failed'));
 }
 
 async function dailyRequest(action, fields = {}) {
