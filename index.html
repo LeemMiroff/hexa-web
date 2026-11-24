@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru" data-visual-theme="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="theme-color" content="#231e32">
+  <meta name="description" content="Соединяй цветные гексы, заряжай башни и получай фишки слияния.">
+  <title>Гексы — мобильный прототип</title>
+  <link rel="icon" href="assets/hex-neutral-rounded-64.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="game" aria-label="Hex Towers">
+    <div id="loading" role="status">.dreamgames</div>
+    <div id="scene-ui">
+      <header class="topbar"><button id="pause" class="icon-button pause-button" aria-label="Пауза" aria-haspopup="dialog"><svg viewBox="0 4.5 32 23"><path d="M10 11.5v9M22 11.5v9"/></svg></button></header>
+      <div class="scene-divider header-divider" aria-hidden="true"></div>
+      <div class="scene-divider tray-divider" aria-hidden="true"></div>
+      <section class="scoreboard" aria-label="Очки">
+        <div id="score">0</div>
+        <span class="score-separator" aria-hidden="true">|</span><div class="goal"><span id="goal-target">5 000</span></div>
+      </section>
+      <div id="goal-progress" class="goal-progress" role="progressbar" aria-label="Прогресс цели" aria-valuemin="0" aria-valuemax="100"><span id="goal-progress-fill"></span></div>
+      <div class="charge-meter red" id="meter-0" role="meter" aria-label="Красный заряд" aria-valuemin="0" aria-valuenow="0" aria-valuemax="20"><div class="charge-track"><span id="charge-0"></span></div><div class="charge-caption"><small id="level-0" aria-label="Уровень 1">1</small></div></div>
+      <div class="charge-meter yellow" id="meter-1" role="meter" aria-label="Жёлтый заряд" aria-valuemin="0" aria-valuenow="0" aria-valuemax="20"><div class="charge-track"><span id="charge-1"></span></div><div class="charge-caption"><small id="level-1" aria-label="Уровень 1">1</small></div></div>
+      <div class="charge-meter blue" id="meter-2" role="meter" aria-label="Синий заряд" aria-valuemin="0" aria-valuenow="0" aria-valuemax="20"><div class="charge-track"><span id="charge-2"></span></div><div class="charge-caption"><small id="level-2" aria-label="Уровень 1">1</small></div></div>
+      <p id="status" class="sr-only" role="status" aria-live="polite"></p>
+      <nav class="tools" aria-label="Инструменты">
+        <button id="undo" class="tool mint" aria-label="Отменить последний ход" title="Отменить последний ход" disabled><svg viewBox="0 0 32 32"><path d="m12 6-8 8 8 8M5 14h13a9 9 0 1 1 0 18" transform="translate(0 -3)"/></svg><span id="undo-count" aria-hidden="true">1</span></button>
+        <button id="swap" class="tool gold" aria-label="Переставить цвета в фигурах" title="Переставить цвета в фигурах"><span class="tool-icon swap-icon" aria-hidden="true"></span><span id="swap-count" class="tool-count" aria-hidden="true"><b>3</b> / 9</span></button>
+        <button id="deal" class="tool lilac" aria-label="Новая раздача" title="Новая раздача"><span class="tool-icon deal-icon" aria-hidden="true"></span><span id="deal-count" class="tool-count" aria-hidden="true"><b>1</b> / 3</span></button>
+      </nav>
+    </div>
+    <dialog id="pause-dialog" aria-label="Пауза"><div class="pause-actions">
+      <button id="sound" class="pause-action" aria-label="Выключить звук" aria-pressed="false"><span class="pause-tile tile-1"><span class="pause-icon sound-icon" aria-hidden="true"></span></span><span>Звук</span></button>
+      <button id="restart" class="pause-action" aria-label="Начать заново"><span class="pause-tile tile-0"><span class="pause-icon restart-icon" aria-hidden="true"></span></span><span>Начать заново</span></button>
+      <button id="help" class="pause-action" aria-label="Как играть"><span class="pause-tile tile-2"><span class="pause-icon help-icon" aria-hidden="true"></span></span><span>Как играть</span></button>
+
+    </div><div class="pause-extra" hidden>
+      <div class="pause-option"><button id="sound-palette" class="icon-button" aria-label="Набор звуков"><svg viewBox="0 0 24 24"><path d="M5 8v8m5-12v16m5-14v12m5-9v6"/></svg></button><span>Набор звуков</span></div>
+      <div class="pause-option"><button id="theme" class="icon-button" aria-label="Тема"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1.4-3.4 1.4 1.4 0 0 1 1-2.4H17a4 4 0 0 0 4-4c0-4.4-4-8.2-9-8.2Z"/><path d="M7 10h.01M10 7h.01M14 7h.01M17 10h.01"/></svg></button><span>Тема</span></div>
+      <div class="pause-option"><button id="fullscreen" class="icon-button" aria-label="Полный экран" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button><span>Полный экран</span></div>
+    </div><button id="main-menu" class="primary menu-button">Главное меню</button><button id="resume" class="primary">Продолжить</button></dialog>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <div class="dialog-symbol">⬡</div>
+      <h1 id="dialog-title">Каждый цвет — свой заряд</h1>
+      <div id="dialog-content"></div>
+      <button id="dialog-primary" class="primary">Поехали</button>
+      <button id="dialog-secondary" class="secondary" hidden>Отменить ход</button>
+    </dialog>
+    <p id="accessible-instructions" class="sr-only">Перетащите одну из трёх фигур на поле. Клавиатура: 1, 2, 3 — выбрать фигуру; стрелки — двигать; Enter — поставить; Escape — отменить перенос.</p>
+  </main>
+  <iframe id="main-menu-screen" title="Главное меню" src="assets/main-menu/index.html" hidden></iframe>
+  <script src="vendor/pixi.min.js"></script>
+  <script type="module" src="src/main.mjs"></script>
+</body>
+</html>
+

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Правильный гексагон с белой верхушкой и серой боковиной</title>
+  <desc>Радиус верхней грани 32. Её высота 32√3 = 55.42562584220407. Боковина смещена вниз на 64 − 32√3 = 8.57437415779593. Видимая геометрия плотно занимает холст 64×64. Фон прозрачный.</desc>
+  <!-- One opaque side silhouette prevents an alpha seam under the white face. -->
+  <path fill="#B8B8B8" d="M16 0H48L64 27.712812921102035V36.287187078897965L48 64H16L0 36.287187078897965V27.712812921102035Z"/>
+  <!-- All six edges of this face are exactly 32 SVG units long. -->
+  <path fill="#FFFFFF" d="M16 0H48L64 27.712812921102035L48 55.42562584220407H16L0 27.712812921102035Z"/>
+</svg>
