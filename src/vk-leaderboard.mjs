@@ -1,9 +1,9 @@
-// Set this to the Cloud Functions HTTPS URL when the VK game is configured.
-const dailyEndpoint = '';
+const dailyEndpoint = 'https://functions.yandexcloud.net/d4e23i3rco9j0o70u5t4';
+const hexaAppId = 54919475;
 const launch = new URLSearchParams(location.search);
 const appId = Number(launch.get('vk_app_id'));
 const userId = Number(launch.get('vk_user_id'));
-const inVK = appId > 0 && userId > 0 && launch.has('sign');
+const inVK = appId === hexaAppId && Number.isSafeInteger(userId) && userId > 0 && launch.has('sign');
 const launchSignature = new URLSearchParams([...launch].filter(([key]) => key === 'sign' || key.startsWith('vk_'))).toString();
 let bridgePromise;
 let tokenPromise;
@@ -74,7 +74,7 @@ async function readVK() {
 }
 
 export function submitLeaderboardScore(score) {
-  if (!inVK || !dailyEndpoint || !Number.isSafeInteger(score) || score <= 0) return;
+  if (!inVK || !Number.isSafeInteger(score) || score <= 0) return;
   const previous = pendingScore;
   const submission = (async () => {
     await previous;
@@ -89,18 +89,23 @@ export function submitLeaderboardScore(score) {
 
 export async function readLeaderboard(mode) {
   if (!inVK) return {message: 'Рейтинг доступен в ВК'};
-  if (mode === 'day' && !dailyEndpoint) return {message: 'Дневной рейтинг пока не подключён'};
   try {
-    if (mode === 'all') {
-      const timeout = AbortSignal.timeout(15000);
-      return await Promise.race([readVK(), new Promise((_, reject) => {
-        timeout.addEventListener('abort', () => {
-          tokenPromise = undefined;
-          reject(timeout.reason);
-        }, {once: true});
-      })]);
-    }
     const submission = await pendingScore;
+    if (mode === 'all') {
+      let timer;
+      try {
+        const data = await Promise.race([readVK(), new Promise((_, reject) => {
+          timer = setTimeout(() => {
+            tokenPromise = undefined;
+            reject(new Error('VK leaderboard request timed out'));
+          }, 15000);
+        })]);
+        if (submission && !submission.vkSynced) data.notice = 'Последний результат не отправлен в ВК';
+        return data;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
     const data = await dailyRequest('day');
     if (submission && !submission.dailySaved) data.notice = 'Последний результат не отправлен';
     return data;
