@@ -64,7 +64,7 @@ function getLaunch() {
 function vkProfile(profile) {
   return {
     id: Number(profile.id),
-    name: [profile.first_name, profile.last_name].filter(Boolean).join(' '),
+    name: profile.first_name?.trim() || '',
     avatar: profile.photo_100 || profile.photo_50 || ''
   };
 }

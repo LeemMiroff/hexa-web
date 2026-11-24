@@ -7,7 +7,7 @@ import {VISUAL_THEME,VISUAL_THEMES,getNextTheme,getEngineTheme} from './visual-t
 import {createThemeAssetLoader} from './theme-assets.mjs';
 import {createParticlePainter} from './particle-painter.mjs';
 import {createSoftGlassPalette,createWoodGlassPalette,createWarmCeramicPalette,createSoftOriginalPalette} from './sound-palette.mjs';
-import {readLeaderboard,readLeaderboardProfile,submitLeaderboardScore} from './vk-leaderboard.mjs?v=3';
+import {readLeaderboard,readLeaderboardProfile,submitLeaderboardScore} from './vk-leaderboard.mjs?v=4';
 let visualTheme=VISUAL_THEME;
 try{localStorage.removeItem('hex-unlocked-themes');}catch{}
 try{const saved=localStorage.getItem('hex-visual-theme'),unlocked=JSON.parse(localStorage.getItem('hex-unlocked-themes')||'[]');if(saved==='warm-flat-test'||(['pearl','monochrome'].includes(saved)&&Array.isArray(unlocked)&&unlocked.includes(saved)))visualTheme=VISUAL_THEMES[saved];}catch{}
